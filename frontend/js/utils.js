@@ -182,14 +182,6 @@ function toggleClassElements(className, displayState) {
     }
 }
 
-function startSessionTime() {
-    let sessionElapsedTime = 0;
-    setInterval(function printTime() {
-        sessionElapsedTime++;
-        sessionTime.innerText = secondsToHms(sessionElapsedTime);
-    }, 1000);
-}
-
 function secondsToHms(d) {
     d = Number(d);
     let h = Math.floor(d / 3600);

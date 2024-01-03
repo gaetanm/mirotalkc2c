@@ -17,22 +17,16 @@ const peerName = new URLSearchParams(window.location.search).get('name');
 
 const loadingDivContainer = document.getElementById('loadingDivContainer');
 const waitingDivContainer = document.getElementById('waitingDivContainer');
-const copyRoomBtn = document.getElementById('copyRoomBtn');
-const shareRoomBtn = document.getElementById('shareRoomBtn');
 const initHideMeBtn = document.getElementById('initHideMeBtn');
 const initAudioBtn = document.getElementById('initAudioBtn');
 const initVideoBtn = document.getElementById('initVideoBtn');
-const initScreenShareBtn = document.getElementById('initScreenShareBtn');
 const initSettingsBtn = document.getElementById('initSettingsBtn');
-const initHomeBtn = document.getElementById('initHomeBtn');
 const buttonsBar = document.getElementById('buttonsBar');
 const hideMeBtn = document.getElementById('hideMeBtn');
 const audioBtn = document.getElementById('audioBtn');
 const videoBtn = document.getElementById('videoBtn');
 const swapCameraBtn = document.getElementById('swapCameraBtn');
 const settingsBtn = document.getElementById('settingsBtn');
-const screenShareBtn = document.getElementById('screenShareBtn');
-const homeBtn = document.getElementById('homeBtn');
 const settings = document.getElementById('settings');
 const settingsCloseBtn = document.getElementById('settingsCloseBtn');
 const audioSource = document.getElementById('audioSource');
@@ -44,9 +38,7 @@ const pushToTalkDiv = document.getElementById('pushToTalkDiv');
 const switchMaxVideoQuality = document.getElementById('switchMaxVideoQuality');
 const switchKeepAspectRatio = document.getElementById('switchKeepAspectRatio');
 const switchPushToTalk = document.getElementById('switchPushToTalk');
-const sessionTime = document.getElementById('sessionTime');
 const chat = document.getElementById('chat');
-const chatOpenBtn = document.getElementById('chatOpenBtn');
 const chatBody = document.getElementById('chatBody');
 const chatCloseBtn = document.getElementById('chatCloseBtn');
 const chatInput = document.getElementById('chatInput');
@@ -174,22 +166,15 @@ let surveyURL = false;
 let redirectURL = false;
 
 const tooltips = [
-    { element: shareRoomBtn, text: 'Share room URL', position: 'top' },
-    { element: copyRoomBtn, text: 'Copy and share room URL', position: 'top' },
     { element: initHideMeBtn, text: 'Hide myself', position: 'top' },
     { element: initVideoBtn, text: 'Toggle video', position: 'top' },
     { element: initAudioBtn, text: 'Toggle audio', position: 'top' },
-    { element: initScreenShareBtn, text: 'Toggle screen sharing', position: 'top' },
     { element: initSettingsBtn, text: 'Toggle settings', position: 'top' },
-    { element: initHomeBtn, text: 'Go to home page', position: 'top' },
     { element: hideMeBtn, text: 'Hide myself', position: 'top' },
     { element: videoBtn, text: 'Toggle video', position: 'top' },
     { element: audioBtn, text: 'Toggle audio', position: 'top' },
     { element: swapCameraBtn, text: 'Swap camera', position: 'top' },
-    { element: screenShareBtn, text: 'Toggle screen sharing', position: 'top' },
-    { element: chatOpenBtn, text: 'Toggle chat', position: 'top' },
     { element: settingsBtn, text: 'Toggle settings', position: 'top' },
-    { element: homeBtn, text: 'Go to home page', position: 'top' },
     //...
 ];
 
@@ -661,7 +646,6 @@ function setLocalMedia(stream) {
     setTippy(myVideoRotateBtn, 'Rotate video', 'bottom');
     setTippy(myAudioStatusIcon, 'Audio status', 'bottom');
     setTippy(myVideoPeerName, 'Username', 'top');
-    startSessionTime();
     if (!isMobileDevice) {
         makeDraggable(myVideoWrap, myVideoDraggableBtn);
     }
@@ -744,19 +728,6 @@ function handleIncomingDataChannelMessage(config) {
 }
 
 function handleEvents() {
-    initHomeBtn.onclick = () => {
-        endCall();
-    };
-    copyRoomBtn.onclick = () => {
-        copyRoom();
-    };
-    if (navigator.share) {
-        shareRoomBtn.onclick = () => {
-            shareRoom();
-        };
-    } else {
-        elemDisplay(shareRoomBtn, false);
-    }
     initHideMeBtn.onclick = () => {
         toggleHideMe();
     };
@@ -778,17 +749,6 @@ function handleEvents() {
     videoBtn.onclick = (e) => {
         setVideoStatus(!localMediaStream.getVideoTracks()[0].enabled, e);
     };
-    if (!isMobileDevice && (navigator.getDisplayMedia || navigator.mediaDevices.getDisplayMedia)) {
-        initScreenShareBtn.onclick = async () => {
-            await toggleScreenSharing();
-        };
-        screenShareBtn.onclick = async () => {
-            await toggleScreenSharing();
-        };
-    } else {
-        elemDisplay(initScreenShareBtn, false);
-        elemDisplay(screenShareBtn, false);
-    }
     navigator.mediaDevices.enumerateDevices().then((devices) => {
         const videoInput = devices.filter((device) => device.kind === 'videoinput');
         if (videoInput.length > 1 && isMobileDevice) {
@@ -882,9 +842,6 @@ function handleEvents() {
             }
         };
     }
-    chatOpenBtn.onclick = () => {
-        toggleChat();
-    };
     chatCloseBtn.onclick = () => {
         toggleChat();
     };
@@ -903,9 +860,6 @@ function handleEvents() {
             this.value = this.value.replace(regex, chatInputEmoji[i]);
         }
         checkLineBreaks();
-    };
-    homeBtn.onclick = () => {
-        endCall();
     };
 }
 
@@ -987,8 +941,6 @@ async function toggleScreenSharing() {
             myVideo.classList.toggle('mirror');
             myVideo.style.objectFit =
                 isScreenStreaming || localStorageConfig.video.settings.aspect_ratio ? 'contain' : 'cover';
-            initScreenShareBtn.className = isScreenStreaming ? className.screenOff : className.screenOn;
-            screenShareBtn.className = isScreenStreaming ? className.screenOff : className.screenOn;
             if (!isScreenStreaming && isMyVideoActiveBefore) videoBtn.click();
         }
     } catch (err) {
