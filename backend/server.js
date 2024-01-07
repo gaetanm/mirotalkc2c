@@ -15,6 +15,8 @@
 require('dotenv').config();
 
 const { Server } = require('socket.io');
+const { Pool } = require('pg');
+
 const http = require('http');
 const https = require('https');
 const compression = require('compression');
@@ -31,6 +33,14 @@ const port = process.env.PORT || 8080;
 const queryJoin = '/join?room=test&name=test';
 const queryRoom = '/?room=test';
 const packageJson = require('../package.json');
+
+const dbConfig = {
+    user: process.env.DB_USER,
+    host: process.env.DB_HOST,
+    database: process.env.DB_NAME,
+    password: process.env.DB_PWD,
+    port: 5432, // Default PostgreSQL port
+};
 
 let server;
 if (isHttps) {
@@ -83,13 +93,19 @@ app.get('/', (req, res) => {
     return res.sendFile(htmlHome);
 });
 
-app.get('/join/', (req, res) => {
+app.get('/join/', async (req, res) => {
     if (Object.keys(req.query).length > 0) {
-        //http://localhost:3000/join?room=test&name=test
         log.debug('[' + req.headers.host + ']' + ' request query', req.query);
         const { room, name } = checkXSS('join', req.query);
+
         if (room && name) {
-            return res.sendFile(htmlClient);
+            const pool = new Pool(dbConfig);
+
+            const sqlQuery = `SELECT room_id FROM live_shows WHERE room_id = '${room}'`;
+            const queryResult = await pool.query(sqlQuery);
+            if (queryResult.rows.length > 0) {
+                return res.sendFile(htmlClient);
+            }
         }
         return notFound(res);
     }
