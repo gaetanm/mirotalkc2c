@@ -40,6 +40,9 @@ const dbConfig = {
     database: process.env.DB_NAME,
     password: process.env.DB_PWD,
     port: 5432, // Default PostgreSQL port
+    ssl: {
+        rejectUnauthorized: false
+    }
 };
 
 let server;
