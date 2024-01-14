@@ -12,7 +12,10 @@
  * @version 1.0.92
  */
 
-const roomId = new URLSearchParams(window.location.search).get('room');
+const initialRoomId = new URLSearchParams(window.location.search).get('room')
+const roomId = initialRoomId.slice(0, -1);
+const isGentleman = initialRoomId[initialRoomId.length - 1] === '1';
+const isSST = initialRoomId[initialRoomId.length - 1] === '2';
 const peerName = new URLSearchParams(window.location.search).get('name');
 
 const loadingDivContainer = document.getElementById('loadingDivContainer');
@@ -243,6 +246,13 @@ function handleConnect() {
             showWaitingUser();
             joinToChannel();
         });
+    }
+
+    if (isGentleman && !isSST) {
+        hideMeBtn.style.display = 'none';
+        videoBtn.style.display = 'none';
+        audioBtn.style.display = 'none';
+        settingsBtn.style.display = 'none';
     }
 }
 
@@ -582,6 +592,11 @@ async function addChild(source, device) {
 }
 
 function setLocalMedia(stream) {
+    if (isGentleman && !isSST) {
+        localMediaStream = stream;
+
+        return;
+    }
     console.log('Access granted to audio/video');
     localMediaStream = stream;
     const myVideoWrap = document.createElement('div');
@@ -652,6 +667,8 @@ function setLocalMedia(stream) {
 }
 
 function setRemoteMedia(stream, peers, peerId) {
+    if (!isGentleman && !isSST) return;
+
     remoteMediaStream = stream;
     const peerName = peers[peerId]['peerName'];
     const peerVideo = peers[peerId]['peerVideo'];
@@ -865,10 +882,19 @@ function handleEvents() {
 
 function showWaitingUser() {
     elemDisplay(loadingDivContainer, false);
+
+    if (isGentleman && !isSST) {
+        elemDisplay(initHideMeBtn, false);
+        elemDisplay(initVideoBtn, false);
+        elemDisplay(initAudioBtn, false);
+        elemDisplay(initSettingsBtn, false);
+    }
     elemDisplay(waitingDivContainer, true);
 }
 
 function toggleHideMe() {
+    if (isGentleman && !isSST) return;
+
     const isVideoWrapHidden = myVideoWrap.style.display == 'none';
     hideMeBtn.className = isVideoWrapHidden ? className.user : className.userOff;
     initHideMeBtn.className = isVideoWrapHidden ? className.user : className.userOff;
@@ -1141,6 +1167,8 @@ function attachMediaStream(element, stream) {
 }
 
 function setAudioStatus(active = true, e = false) {
+    if (isGentleman && !isSST) return;
+
     console.log(`This PeerId ${thisPeerId} audio status`, active);
     isAudioStreaming = active;
     setAudioButtons(active, e);
