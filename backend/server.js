@@ -104,7 +104,7 @@ app.get('/join/', async (req, res) => {
         if (room && name) {
             const pool = new Pool(dbConfig);
 
-            const sqlQuery = `SELECT room_id FROM live_shows WHERE room_id = '${room.slice(0, -1)}'`;
+            const sqlQuery = `SELECT room_id FROM live_shows WHERE room_id = '${room}'`;
             const queryResult = await pool.query(sqlQuery);
             if (queryResult.rows.length > 0) {
                 return res.sendFile(htmlClient);
